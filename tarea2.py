@@ -1,7 +1,11 @@
+# tareas.py
+import json
+import os
+
+
 class Configuracion:
     """
-    Clase Singleton para manejar la configuración global de la aplicación.
-    Solo puede existir una instancia de esta clase.
+    Clase Singleton para la configuración global.
     """
     _instancia = None
 
@@ -16,41 +20,81 @@ class Configuracion:
 
     def desactivar_debug(self):
         self.modo_debug = False
-        
+
+
 class GestorTareas:
     """
-    Clase que permite agregar, listar y marcar tareas como completadas.
+    Clase principal que gestiona las tareas y las operaciones sobre ellas.
     """
-    def __init__(self):
+    def __init__(self, archivo_datos="tareas.json"):
         self.tareas = []
-        self.config = Configuracion()  # Acceso al Singleton
+        self.config = Configuracion()
+        self.archivo_datos = archivo_datos
+        self.cargar_tareas()  # Carga automática al iniciar
 
     def agregar_tarea(self, descripcion):
         tarea = {"descripcion": descripcion, "completada": False}
         self.tareas.append(tarea)
         if self.config.modo_debug:
             print(f"[DEBUG] Tarea agregada: {descripcion}")
+        self.guardar_tareas()
+        return tarea
 
     def listar_tareas(self):
         if not self.tareas:
-            print("No hay tareas registradas.")
-            return
+            print("No hay tareas registradas.") 
+            if self.config.modo_debug:
+                print("[DEBUG] No hay tareas registradas.")
+            return []  
         print("\n--- Lista de tareas ---")
         for i, tarea in enumerate(self.tareas, start=1):
             estado = "Completada" if tarea["completada"] else "Pendiente"
             print(f"{i}. {tarea['descripcion']} - {estado}")
+        if self.config.modo_debug:
+            print("[DEBUG] Listando tareas...")
+        return self.tareas
 
     def completar_tarea(self, indice):
         if 0 <= indice < len(self.tareas):
             self.tareas[indice]["completada"] = True
             if self.config.modo_debug:
                 print(f"[DEBUG] Tarea completada: {self.tareas[indice]['descripcion']}")
-        else:
-            print("Índice no válido.")
+            self.guardar_tareas()
+            return True
 
-        # Programa principal
+        if self.config.modo_debug:
+            print("[DEBUG] Índice no válido.")
+        return False
+
+    # --- NUEVAS FUNCIONES JSON ---
+    def guardar_tareas(self):
+        """Guarda las tareas en un archivo JSON."""
+        try:
+            with open(self.archivo_datos, "w", encoding="utf-8") as archivo:
+                json.dump(self.tareas, archivo, indent=4, ensure_ascii=False)
+            if getattr(self.config, "modo_debug", False):
+                print(f"[DEBUG] Tareas guardadas en {self.archivo_datos}")
+        except Exception as e:
+            print(f"Error al guardar tareas: {e}")
+
+    def cargar_tareas(self):
+        """Carga las tareas desde el archivo JSON si existe."""
+        if os.path.exists(self.archivo_datos):
+            try:
+                with open(self.archivo_datos, "r", encoding="utf-8") as archivo:
+                    self.tareas = json.load(archivo)
+                if getattr(self.config, "modo_debug", False):
+                    print(f"[DEBUG] Tareas cargadas desde {self.archivo_datos}")
+            except Exception as e:
+                print(f"Error al cargar tareas: {e}")
+        else:
+            if getattr(self.config, "modo_debug", False):
+                print("[DEBUG] No hay archivo de tareas previo, se inicia vacío.")
+
+
+# --- PROGRAMA PRINCIPAL ---
 if __name__ == "__main__":
-    config = Configuracion(modo_debug=True)  # Se crea la única instancia
+    config = Configuracion(modo_debug=True)
     gestor = GestorTareas()
 
     while True:
@@ -75,7 +119,8 @@ if __name__ == "__main__":
             except ValueError:
                 print("Debes ingresar un número válido.")
         elif opcion == "4":
-            print("Saliendo del programa...")
+            print("Guardando tareas y saliendo...")
+            gestor.guardar_tareas()
             break
         else:
             print("Opción no válida.")
