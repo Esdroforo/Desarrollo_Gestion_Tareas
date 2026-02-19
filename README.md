@@ -30,5 +30,9 @@ El funcionamiento del patrón Singleton.
 La creación, listado y completado de tareas.
 La correcta lectura y escritura del archivo JSON.
 
+<img width="444" height="254" alt="image" src="https://github.com/user-attachments/assets/40342bfb-9470-465c-a98a-a9e7128f641e" />
+<img width="257" height="111" alt="image" src="https://github.com/user-attachments/assets/493c1ea9-60ac-4f25-a358-c9e6973e121e" />
+
+
 
 # Desarrollo-y-gesti-n-de-una-aplicaci-n-de-tareas
