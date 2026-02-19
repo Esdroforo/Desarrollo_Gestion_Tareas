@@ -1,3 +1,22 @@
+class Configuracion:
+    """
+    Clase Singleton para manejar la configuración global de la aplicación.
+    Solo puede existir una instancia de esta clase.
+    """
+    _instancia = None
+
+    def __new__(cls, modo_debug=False):
+        if cls._instancia is None:
+            cls._instancia = super().__new__(cls)
+            cls._instancia.modo_debug = modo_debug
+        return cls._instancia
+
+    def activar_debug(self):
+        self.modo_debug = True
+
+    def desactivar_debug(self):
+        self.modo_debug = False
+        
 class GestorTareas:
     """
     Clase que permite agregar, listar y marcar tareas como completadas.
